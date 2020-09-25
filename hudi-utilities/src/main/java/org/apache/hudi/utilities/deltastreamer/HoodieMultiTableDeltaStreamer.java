@@ -25,6 +25,7 @@ import org.apache.hudi.common.model.OverwriteWithLatestAvroPayload;
 import org.apache.hudi.common.util.StringUtils;
 import org.apache.hudi.common.config.TypedProperties;
 import org.apache.hudi.common.util.ValidationUtils;
+import org.apache.hudi.exception.HoodieDeltaStreamerException;
 import org.apache.hudi.utilities.IdentitySplitter;
 import org.apache.hudi.exception.HoodieException;
 import org.apache.hudi.utilities.UtilHelpers;
@@ -362,6 +363,8 @@ public class HoodieMultiTableDeltaStreamer {
     logger.info("Ingestion was successful for topics: " + successTables);
     if (!failedTables.isEmpty()) {
       logger.info("Ingestion failed for topics: " + failedTables);
+
+      throw new HoodieDeltaStreamerException("Ingestion failed for topics: " + failedTables);
     }
   }
 
