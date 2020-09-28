@@ -26,6 +26,7 @@ import org.apache.hudi.common.util.StringUtils;
 import org.apache.hudi.common.config.TypedProperties;
 import org.apache.hudi.common.util.ValidationUtils;
 import org.apache.hudi.exception.HoodieDeltaStreamerException;
+import org.apache.hudi.hive.HiveSyncTool;
 import org.apache.hudi.utilities.IdentitySplitter;
 import org.apache.hudi.exception.HoodieException;
 import org.apache.hudi.utilities.UtilHelpers;
@@ -166,6 +167,8 @@ public class HoodieMultiTableDeltaStreamer {
 
     static void deepCopyConfigs(Config globalConfig, HoodieDeltaStreamer.Config tableConfig) {
       tableConfig.enableHiveSync = globalConfig.enableHiveSync;
+      tableConfig.enableMetaSync = globalConfig.enableMetaSync;
+      tableConfig.syncClientToolClass = globalConfig.syncClientToolClass;
       tableConfig.schemaProviderClassName = globalConfig.schemaProviderClassName;
       tableConfig.sourceOrderingField = globalConfig.sourceOrderingField;
       tableConfig.sourceClassName = globalConfig.sourceClassName;
@@ -276,6 +279,12 @@ public class HoodieMultiTableDeltaStreamer {
 
     @Parameter(names = {"--enable-hive-sync"}, description = "Enable syncing to hive")
     public Boolean enableHiveSync = false;
+
+    @Parameter(names = {"--enable-sync"}, description = "Enable syncing meta")
+    public Boolean enableMetaSync = false;
+
+    @Parameter(names = {"--sync-tool-classes"}, description = "Meta sync client tool, using comma to separate multi tools")
+    public String syncClientToolClass = HiveSyncTool.class.getName();
 
     @Parameter(names = {"--max-pending-compactions"},
         description = "Maximum number of outstanding inflight/requested compactions. Delta Sync will not happen unless"
