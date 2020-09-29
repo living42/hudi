@@ -70,6 +70,7 @@
                   <include>org.apache.hudi:hudi-utilities_${scala.binary.version}</include>
                   <include>org.apache.hudi:hudi-spark_${scala.binary.version}</include>
                   <include>org.apache.hudi:hudi-hive-sync</include>
+                  <include>org.apache.hudi:hudi-dla-sync</include>
                   <include>org.apache.hudi:hudi-sync-common</include>
                   <include>org.apache.hudi:hudi-hadoop-mr</include>
                   <include>org.apache.hudi:hudi-timeline-service</include>
@@ -106,6 +107,7 @@
                   <include>org.apache.kafka:kafka_${scala.binary.version}</include>
                   <include>com.101tec:zkclient</include>
                   <include>org.apache.kafka:kafka-clients</include>
+                  <include>mysql:mysql-connector-java</include>  <!-- used by hudi-dla-sync -->
 
                   <include>org.apache.hive:hive-common</include>
                   <include>org.apache.hive:hive-service</include>
@@ -226,6 +228,11 @@
           <artifactId>servlet-api</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hudi</groupId>
+      <artifactId>hudi-dla-sync</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.hudi</groupId>
