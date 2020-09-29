@@ -77,7 +77,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
-
 import java.util.stream.Collectors;
 
 import scala.collection.JavaConversions;
@@ -169,6 +168,8 @@ public class DeltaSync implements Serializable {
    */
   private transient HoodieWriteClient writeClient;
 
+  private transient HoodieDeltaStreamerMetrics metrics;
+
   public DeltaSync(HoodieDeltaStreamer.Config cfg, SparkSession sparkSession, SchemaProvider schemaProvider,
                    TypedProperties props, JavaSparkContext jssc, FileSystem fs, Configuration conf,
                    Function<HoodieWriteClient, Boolean> onInitializingHoodieWriteClient) throws IOException {
@@ -188,8 +189,10 @@ public class DeltaSync implements Serializable {
     this.transformer = UtilHelpers.createTransformer(cfg.transformerClassNames);
     this.keyGenerator = DataSourceUtils.createKeyGenerator(props);
 
+    this.metrics = new HoodieDeltaStreamerMetrics(getHoodieClientConfig(this.schemaProvider));
+
     this.formatAdapter = new SourceFormatAdapter(
-        UtilHelpers.createSource(cfg.sourceClassName, props, jssc, sparkSession, schemaProvider));
+        UtilHelpers.createSource(cfg.sourceClassName, props, jssc, sparkSession, schemaProvider, metrics));
     this.conf = conf;
   }
 
@@ -224,7 +227,6 @@ public class DeltaSync implements Serializable {
    */
   public Pair<Option<String>, JavaRDD<WriteStatus>> syncOnce() throws IOException {
     Pair<Option<String>, JavaRDD<WriteStatus>> result = null;
-    HoodieDeltaStreamerMetrics metrics = new HoodieDeltaStreamerMetrics(getHoodieClientConfig(schemaProvider));
     Timer.Context overallTimerContext = metrics.getOverallTimerContext();
 
     // Refresh Timeline
