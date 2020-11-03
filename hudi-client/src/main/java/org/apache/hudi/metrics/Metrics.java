@@ -35,6 +35,7 @@ public class Metrics {
   private static final Logger LOG = LogManager.getLogger(Metrics.class);
 
   private static volatile boolean initialized = false;
+  private static volatile boolean shutdownHookAttached = false;
   private static Metrics metrics = null;
   private final MetricRegistry registry;
   private MetricsReporter reporter;
@@ -48,16 +49,12 @@ public class Metrics {
     }
     reporter.start();
 
-    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-      try {
-        reporter.report();
-        if (getReporter() != null) {
-          getReporter().close();
-        }
-      } catch (Exception e) {
-        LOG.warn("Error while closing reporter", e);
+    synchronized (Metrics.class) {
+      if (!shutdownHookAttached) {
+        Runtime.getRuntime().addShutdownHook(new Thread(Metrics::shutdown));
+        shutdownHookAttached = true;
       }
-    }));
+    }
   }
 
   public static Metrics getInstance() {
@@ -75,6 +72,28 @@ public class Metrics {
       throw new HoodieException(e);
     }
     initialized = true;
+  }
+
+  public static synchronized void shutdown() {
+    if (!initialized) {
+      return;
+    }
+    reportAndCloseReporter();
+    initialized = false;
+  }
+
+  private static void reportAndCloseReporter() {
+    if (!initialized) {
+      return;
+    }
+    try {
+      metrics.reporter.report();
+      if (metrics.getReporter() != null) {
+        metrics.getReporter().close();
+      }
+    } catch (Exception e) {
+      LOG.warn("Error while closing reporter", e);
+    }
   }
 
   public static void registerGauge(String metricName, final long value) {
